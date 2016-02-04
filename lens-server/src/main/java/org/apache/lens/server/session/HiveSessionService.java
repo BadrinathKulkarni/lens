@@ -298,6 +298,7 @@ public class HiveSessionService extends BaseLensService implements SessionServic
   public void setSessionParameter(LensSessionHandle sessionid, String key, String value) {
     setSessionParameter(sessionid, key, value, true);
   }
+
   /**
    * Sets the session parameter.
    *
@@ -311,7 +312,7 @@ public class HiveSessionService extends BaseLensService implements SessionServic
     try {
       acquire(sessionid);
       // set in session conf
-      for(Map.Entry<String, String> entry: config.entrySet()) {
+      for (Map.Entry<String, String> entry : config.entrySet()) {
         String var = entry.getKey();
         if (var.indexOf(SetProcessor.HIVECONF_PREFIX) == 0) {
           var = var.substring(SetProcessor.HIVECONF_PREFIX.length());
@@ -335,14 +336,15 @@ public class HiveSessionService extends BaseLensService implements SessionServic
       release(sessionid);
     }
   }
-    /**
-     * Sets the session parameter.
-     *
-     * @param sessionid    the sessionid
-     * @param key          the key
-     * @param value        the value
-     * @param addToSession the add to session
-     */
+
+  /**
+   * Sets the session parameter.
+   *
+   * @param sessionid    the sessionid
+   * @param key          the key
+   * @param value        the value
+   * @param addToSession the add to session
+   */
   protected void setSessionParameter(LensSessionHandle sessionid, String key, String value, boolean addToSession) {
     HashMap<String, String> config = Maps.newHashMap();
     config.put(key, value);
@@ -374,7 +376,7 @@ public class HiveSessionService extends BaseLensService implements SessionServic
     sessionExpiryThread = Executors.newSingleThreadScheduledExecutor();
     int sessionExpiryInterval = getSessionExpiryInterval();
     sessionExpiryThread.scheduleWithFixedDelay(sessionExpiryRunnable, sessionExpiryInterval,
-        sessionExpiryInterval, TimeUnit.SECONDS);
+      sessionExpiryInterval, TimeUnit.SECONDS);
 
     // Restore sessions if any
     if (restorableSessions == null || restorableSessions.size() <= 0) {
@@ -402,7 +404,7 @@ public class HiveSessionService extends BaseLensService implements SessionServic
         }
 
         // Add config for restored sessions
-        try{
+        try {
           setSessionParameters(sessionHandle, session.getConfig(), false);
         } catch (Exception e) {
           log.error("Error setting parameters " + session.getConfig()
@@ -419,7 +421,7 @@ public class HiveSessionService extends BaseLensService implements SessionServic
 
   private int getSessionExpiryInterval() {
     return conf.getInt(LensConfConstants.SESSION_EXPIRY_SERVICE_INTERVAL_IN_SECS,
-        LensConfConstants.DEFAULT_SESSION_EXPIRY_SERVICE_INTERVAL_IN_SECS);
+      LensConfConstants.DEFAULT_SESSION_EXPIRY_SERVICE_INTERVAL_IN_SECS);
   }
 
   /*
@@ -457,8 +459,8 @@ public class HiveSessionService extends BaseLensService implements SessionServic
   @Override
   public HealthStatus getHealthStatus() {
     return this.getServiceState().equals(STATE.STARTED)
-        ? new HealthStatus(true, "Hive session service is healthy.")
-        : new HealthStatus(false, "Hive session service is down.");
+      ? new HealthStatus(true, "Hive session service is healthy.")
+      : new HealthStatus(false, "Hive session service is down.");
   }
 
   /*
@@ -487,6 +489,16 @@ public class HiveSessionService extends BaseLensService implements SessionServic
   public void closeSession(LensSessionHandle sessionHandle) throws LensException {
     closeInternal(sessionHandle);
     notifyEvent(new SessionClosed(System.currentTimeMillis(), sessionHandle));
+  }
+
+  public List<LensSessionHandle> listSessions() {
+    ArrayList<LensSessionHandle> sessions = new ArrayList<LensSessionHandle>();
+
+    for (String key : SESSION_MAP.keySet()) {
+      sessions.add(SESSION_MAP.get(key));
+    }
+
+    return sessions;
   }
 
   /**

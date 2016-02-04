@@ -22,13 +22,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashMap;
+import java.util.*;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Application;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -106,6 +107,36 @@ public class TestSessionResource extends LensJerseyTest {
   }
 
   /**
+   * Test session List.
+   */
+  @Test(dataProvider = "mediaTypeData")
+  public void testSessionList(MediaType mt) {
+    final WebTarget target = target().path("session");
+    final FormDataMultiPart mp = new FormDataMultiPart();
+
+    mp.bodyPart(new FormDataBodyPart(FormDataContentDisposition.name("username").build(), "foo"));
+    mp.bodyPart(new FormDataBodyPart(FormDataContentDisposition.name("password").build(), "bar"));
+    mp.bodyPart(new FormDataBodyPart(FormDataContentDisposition.name("sessionconf").fileName("sessionconf").build(),
+      new LensConf(), mt));
+
+    HashSet<LensSessionHandle> openedHandles = new HashSet<LensSessionHandle>();
+    for(int i=0;i<10;i++){
+      final LensSessionHandle handle = target.request(mt).post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE),
+        LensSessionHandle.class);
+      openedHandles.add(handle);
+      Assert.assertNotNull(handle);
+    }
+
+    List<LensSessionHandle> actualHandles = target.path("list").request(mt).get(new GenericType<List<LensSessionHandle>>() {
+    });
+
+    HashSet<LensSessionHandle> receivedHandlesSet = new HashSet<LensSessionHandle>();
+    receivedHandlesSet.addAll(actualHandles);
+
+    Assert.assertEquals(receivedHandlesSet,openedHandles);
+  }
+
+  /**
    * Test session.
    */
   @Test(dataProvider = "mediaTypeData")
@@ -121,6 +152,7 @@ public class TestSessionResource extends LensJerseyTest {
     final LensSessionHandle handle = target.request(mt).post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA_TYPE),
       LensSessionHandle.class);
     Assert.assertNotNull(handle);
+
 
     // get all session params
     final WebTarget paramtarget = target().path("session/params");

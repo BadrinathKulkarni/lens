@@ -86,7 +86,7 @@ public class SessionResource {
   @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
   public LensSessionHandle openSession(@FormDataParam("username") String username,
     @FormDataParam("password") String password,
-    @FormDataParam("database")  @DefaultValue("") String database,
+    @FormDataParam("database") @DefaultValue("") String database,
     @FormDataParam("sessionconf") LensConf sessionconf) {
     try {
       Map<String, String> conf;
@@ -95,7 +95,7 @@ public class SessionResource {
       } else {
         conf = new HashMap<String, String>();
       }
-      return sessionService.openSession(username, password, database,   conf);
+      return sessionService.openSession(username, password, database, conf);
     } catch (LensException e) {
       throw new WebApplicationException(e);
     }
@@ -116,6 +116,18 @@ public class SessionResource {
       return new APIResult(Status.FAILED, e.getMessage());
     }
     return new APIResult(Status.SUCCEEDED, "Close session with id" + sessionid + "succeeded");
+  }
+
+  /**
+   * Get a list of key=value parameters set for this session.
+   *
+   * @return List of Strings, one entry per key-value pair
+   */
+  @GET
+  @Path("list")
+  @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML, MediaType.TEXT_PLAIN})
+  public List<LensSessionHandle> getAllSession() {
+    return sessionService.listSessions();
   }
 
   /**
@@ -200,7 +212,7 @@ public class SessionResource {
 
     int numDeleted = 0;
 
-    for(String matchedPath : scannedPaths) {
+    for (String matchedPath : scannedPaths) {
       for (BaseLensService service : LensServices.get().getLensServices()) {
         try {
           if (matchedPath.startsWith("file:") && !matchedPath.startsWith("file://")) {
