@@ -35,10 +35,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.apache.lens.api.jaxb.LensJAXBContext;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * The Class LensSessionHandle.
@@ -56,6 +53,7 @@ import lombok.NoArgsConstructor;
 /**
  * Instantiates a new lens session handle.
  */
+@EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LensSessionHandle {
 
