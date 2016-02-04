@@ -121,7 +121,7 @@ public class LensConnection {
     return cb.build();
   }
 
-  private WebTarget getSessionWebTarget() {
+  WebTarget getSessionWebTarget() {
     return getSessionWebTarget(buildClient());
   }
 

@@ -127,8 +127,9 @@ public class TestSessionResource extends LensJerseyTest {
       Assert.assertNotNull(handle);
     }
 
-    List<LensSessionHandle> actualHandles = target.path("list").request(mt).get(new GenericType<List<LensSessionHandle>>() {
-    });
+    List<LensSessionHandle> actualHandles =
+      target.path("list").request(mt).get(new GenericType<List<LensSessionHandle>>() {
+      });
 
     HashSet<LensSessionHandle> receivedHandlesSet = new HashSet<LensSessionHandle>();
     receivedHandlesSet.addAll(actualHandles);

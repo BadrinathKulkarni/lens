@@ -22,9 +22,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.lens.api.APIResult;
+import org.apache.lens.api.LensConf;
+import org.apache.lens.api.LensSessionHandle;
 import org.apache.lens.api.metastore.*;
 import org.apache.lens.api.query.*;
 import org.apache.lens.api.result.LensAPIResult;
@@ -35,6 +40,9 @@ import org.apache.lens.client.model.BriefError;
 import org.apache.lens.client.model.IdBriefErrorTemplate;
 import org.apache.lens.client.model.IdBriefErrorTemplateKey;
 
+import org.glassfish.jersey.media.multipart.FormDataBodyPart;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +55,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class LensClient {
-  public static final String CLILOGGER =  "cliLogger";
+  public static final String CLILOGGER = "cliLogger";
   private static final String DEFAULT_PASSWORD = "";
   private final LensClientConfig conf;
   @Getter
@@ -117,6 +125,23 @@ public class LensClient {
     return mc.getPartitionTimelines(factName, storageName, updatePeriod, timeDimension);
   }
 
+  public List<LensSessionHandle> listSessions() {
+
+    WebTarget target = connection.getSessionWebTarget();
+    final FormDataMultiPart mp = new FormDataMultiPart();
+
+    mp.bodyPart(new FormDataBodyPart(FormDataContentDisposition.name("username").build(), "foo"));
+    mp.bodyPart(new FormDataBodyPart(FormDataContentDisposition.name("password").build(), "bar"));
+    mp.bodyPart(new FormDataBodyPart(FormDataContentDisposition.name("sessionconf").fileName("sessionconf").build(),
+      new LensConf(), MediaType.MULTIPART_FORM_DATA_TYPE));
+
+    List<LensSessionHandle> handles =
+      target.path("list").request(MediaType.APPLICATION_XML_TYPE).get(new GenericType<List<LensSessionHandle>>() {
+      });
+
+    return handles;
+  }
+
   public static class LensClientResultSetWithStats {
     private final LensClientResultSet resultSet;
     private final LensQuery query;
@@ -146,7 +171,7 @@ public class LensClient {
     QueryStatus.Status status = statement.getStatus().getStatus();
     if (status != QueryStatus.Status.SUCCESSFUL) {
       IdBriefErrorTemplate errorResult = new IdBriefErrorTemplate(IdBriefErrorTemplateKey.QUERY_ID,
-          statement.getQueryHandleString(), new BriefError(statement.getErrorCode(), statement.getErrorMessage()));
+        statement.getQueryHandleString(), new BriefError(statement.getErrorCode(), statement.getErrorMessage()));
       throw new LensBriefErrorException(errorResult);
     }
     LensClientResultSet result = null;
@@ -424,6 +449,7 @@ public class LensClient {
   public XFlattenedColumns getQueryableFields(String table, boolean flattened) {
     return mc.getQueryableFields(table, flattened);
   }
+
   public XJoinChains getJoinChains(String table) {
     return mc.getJoinChains(table);
   }
@@ -539,6 +565,7 @@ public class LensClient {
   public APIResult addPartitionsToDim(String table, String storage, String partsSpec) {
     return mc.addPartitionsToDimensionTable(table, storage, partsSpec);
   }
+
   public APIResult updatePartitionOfFact(String table, String storage, String partSpec) {
     return mc.updatePartitionOfFactTable(table, storage, partSpec);
   }

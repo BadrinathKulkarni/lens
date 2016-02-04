@@ -175,6 +175,28 @@ public class LensConnectionCommands extends BaseLensCommand {
   }
 
   /**
+   * Get the current session handle
+   */
+  @CliCommand(value = {"list sessions"}, help = "Prints all the open session handles")
+  public String listSessions() {
+    List<LensSessionHandle> sessionHandles = getClient().listSessions();
+
+    if (sessionHandles == null || sessionHandles.size() == 0) {
+      return null;
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("Open session handles :");
+    for (LensSessionHandle l : sessionHandles) {
+      sb.append(l.getPublicId() + "\n");
+    }
+    sb.append("Count : " + sessionHandles.size());
+
+
+    return sb.toString();
+  }
+
+  /**
    * Enables to show all class level logs on cli
    * @param enable
    */
@@ -182,7 +204,7 @@ public class LensConnectionCommands extends BaseLensCommand {
     help = "prints all class level logs and verbose logs on cli for debugging purpose."
       + " 'debug false' to turn off all class level logging and verbose level logging ")
   public void debug(@CliOption(key = {"", "enable"},
-      mandatory = false, unspecifiedDefaultValue = "true") boolean enable) {
+    mandatory = false, unspecifiedDefaultValue = "true") boolean enable) {
     Logger logger = LoggerUtil.getRootLogger();
     Logger cliLogger = LoggerUtil.getCliLogger();
     if (enable) {
@@ -201,7 +223,7 @@ public class LensConnectionCommands extends BaseLensCommand {
   @CliCommand(value = {"verbose"},
     help = "Show cliLogger logs on cli. 'verbose false'  turns off the cliLogger logs on console")
   public void verbose(@CliOption(key = {"", "enable"},
-      mandatory = false, unspecifiedDefaultValue = "true") boolean enable) {
+    mandatory = false, unspecifiedDefaultValue = "true") boolean enable) {
     Logger cliLogger = LoggerUtil.getCliLogger();
     if (enable) {
       LoggerUtil.addConsoleAppenderIfNotPresent(cliLogger);
